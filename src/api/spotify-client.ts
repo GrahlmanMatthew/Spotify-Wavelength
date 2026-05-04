@@ -1,4 +1,4 @@
-import type { ArtistsResponse, SpotifyArtist, SpotifyTrack, TimeRange, TopArtistsResponse, TopTracksResponse } from '../types/spotify'
+import type { ArtistsResponse, SpotifyArtist, SpotifyTrack, SpotifyUser, TimeRange, TopArtistsResponse, TopTracksResponse } from '../types/spotify'
 
 const API_BASE = 'https://api.spotify.com/v1'
 
@@ -39,6 +39,10 @@ export async function fetchTopTracks(
   const params = new URLSearchParams({ time_range: timeRange, limit: String(limit) })
   const data = await spotifyGet<TopTracksResponse>(accessToken, `/me/top/tracks?${params}`)
   return data.items
+}
+
+export async function fetchCurrentUser(accessToken: string): Promise<SpotifyUser> {
+  return spotifyGet<SpotifyUser>(accessToken, '/me')
 }
 
 export async function fetchArtistDetails(

@@ -54,3 +54,9 @@ export interface TokenResponse {
   scope: string
   expires_in: number
 }
+
+export interface SpotifyUser {
+  id: string
+  display_name: string
+  images: SpotifyImage[]
+}

@@ -8,6 +8,9 @@ interface PackItem {
   label: string
   sublabel: string
   spotifyUrl: string
+  itemType: 'artist' | 'track'
+  album?: string
+  duration?: number
 }
 
 interface TooltipState {
@@ -40,7 +43,7 @@ function renderCirclePack(
 ): SVGSVGElement {
   container.innerHTML = ''
 
-  const size = Math.min(container.clientWidth || 800, Math.floor(window.innerHeight * 0.82))
+  const size = Math.min((container.clientWidth || 800) * 1.2, Math.floor(window.innerHeight * 0.82 * 1.2))
 
   const root = d3
     .hierarchy<{ children?: PackItem[] } | PackItem>({ children: items })
@@ -56,7 +59,7 @@ function renderCirclePack(
     .append('svg')
     .attr('width', size)
     .attr('height', size)
-    .style('background', '#111213')
+    .style('background', 'transparent')
     .style('display', 'block')
     .style('margin', '0 auto')
 
@@ -78,13 +81,27 @@ function renderCirclePack(
     .append('g')
     .attr('class', 'pack-item')
     .attr('transform', (d) => `translate(${d.x},${d.y})`)
-    .style('cursor', 'pointer')
-    .on('click', (_, d) => window.open(d.data.spotifyUrl, '_blank'))
+    .style('cursor', 'default')
     .on('mousemove', (event: MouseEvent, d) => {
+      const rankLabel =
+        d.data.itemType === 'artist'
+          ? d.data.rank === 1
+            ? 'Your most played artist'
+            : d.data.rank <= 10
+              ? `Your #${d.data.rank} most played artist`
+              : `#${d.data.rank} in your top artists`
+          : null
+
+      const durationLabel =
+        d.data.duration != null
+          ? `${Math.floor(d.data.duration / 60000)}:${String(Math.floor((d.data.duration % 60000) / 1000)).padStart(2, '0')}`
+          : null
+
       tooltip.innerHTML = `
         <div style="font-size:12px;font-weight:700;color:#fff;line-height:1.3">${d.data.label}</div>
         ${d.data.sublabel ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px">${d.data.sublabel}</div>` : ''}
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">#${d.data.rank}</div>
+        ${d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px">${d.data.album}${durationLabel ? ` · ${durationLabel}` : ''}</div>` : ''}
+        ${rankLabel ? `<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${rankLabel}</div>` : !d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">#${d.data.rank}</div>` : ''}
       `
       tooltip.style.opacity = '1'
       tooltip.style.left = `${event.clientX + 14}px`
@@ -131,24 +148,26 @@ function renderCirclePack(
         .join('')
     )
 
-  // Rank badge — top 3
+  // Rank badge — top 10 (only when circle is large enough to fit it)
   groups
-    .filter((d) => d.data.rank <= 3)
+    .filter((d) => d.data.rank <= 10 && d.r >= 20)
     .append('circle')
-    .attr('r', (d) => Math.max(10, d.r * 0.22))
+    .attr('r', (d) => (d.data.rank <= 3 ? Math.max(10, d.r * 0.22) : Math.max(8, d.r * 0.18)))
     .attr('cx', (d) => d.r * 0.6)
     .attr('cy', (d) => -d.r * 0.6)
-    .attr('fill', '#1DB954')
+    .attr('fill', (d) => (d.data.rank <= 3 ? '#1DB954' : 'rgba(255,255,255,0.2)'))
 
   groups
-    .filter((d) => d.data.rank <= 3)
+    .filter((d) => d.data.rank <= 10 && d.r >= 20)
     .append('text')
     .attr('x', (d) => d.r * 0.6)
     .attr('y', (d) => -d.r * 0.6)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
-    .attr('fill', '#000')
-    .attr('font-size', (d) => Math.max(7, d.r * 0.18))
+    .attr('fill', (d) => (d.data.rank <= 3 ? '#000' : '#fff'))
+    .attr('font-size', (d) =>
+      d.data.rank <= 3 ? Math.max(7, d.r * 0.18) : Math.max(6, d.r * 0.15)
+    )
     .attr('font-weight', '700')
     .attr('font-family', 'system-ui, sans-serif')
     .attr('pointer-events', 'none')
@@ -171,6 +190,9 @@ export function renderTrackMosaic(
       label: t.name,
       sublabel: t.artists.map((a) => a.name).join(', '),
       spotifyUrl: t.external_urls.spotify,
+      itemType: 'track' as const,
+      album: t.album.name,
+      duration: t.duration_ms,
     }
   })
   return renderCirclePack(container, items, tooltip, 'clip-track')
@@ -190,6 +212,7 @@ export function renderArtistMosaic(
       label: a.name,
       sublabel: '',
       spotifyUrl: a.external_urls.spotify,
+      itemType: 'artist' as const,
     }
   })
   return renderCirclePack(container, items, tooltip, 'clip-artist')
