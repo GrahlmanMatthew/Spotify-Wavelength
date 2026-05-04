@@ -155,7 +155,7 @@ function renderCirclePack(
     .attr('r', (d) => (d.data.rank <= 3 ? Math.max(10, d.r * 0.22) : Math.max(8, d.r * 0.18)))
     .attr('cx', (d) => d.r * 0.6)
     .attr('cy', (d) => -d.r * 0.6)
-    .attr('fill', (d) => (d.data.rank <= 3 ? '#1DB954' : 'rgba(255,255,255,0.2)'))
+    .attr('fill', '#1DB954')
 
   groups
     .filter((d) => d.data.rank <= 10 && d.r >= 20)
@@ -164,7 +164,7 @@ function renderCirclePack(
     .attr('y', (d) => -d.r * 0.6)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
-    .attr('fill', (d) => (d.data.rank <= 3 ? '#000' : '#fff'))
+    .attr('fill', '#000')
     .attr('font-size', (d) =>
       d.data.rank <= 3 ? Math.max(7, d.r * 0.18) : Math.max(6, d.r * 0.15)
     )
@@ -201,14 +201,16 @@ export function renderTrackMosaic(
 export function renderArtistMosaic(
   container: HTMLElement,
   artists: SpotifyArtist[],
-  tooltip: HTMLDivElement
+  tooltip: HTMLDivElement,
+  artistAlbumArt?: Map<string, string>
 ): SVGSVGElement {
   const items: PackItem[] = artists.map((a, i) => {
     const imgs = a.images
+    const artistImageUrl = imgs.find((img) => !!img.url)?.url ?? ''
     return {
       id: a.id,
       rank: i + 1,
-      imageUrl: imgs.find((img) => img.width >= 64)?.url ?? imgs[0]?.url ?? '',
+      imageUrl: artistImageUrl || artistAlbumArt?.get(a.id) || '',
       label: a.name,
       sublabel: '',
       spotifyUrl: a.external_urls.spotify,

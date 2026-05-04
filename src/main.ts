@@ -57,11 +57,24 @@ async function main(): Promise<void> {
     }),
   ])
 
+  // Build artist → album art fallback from all cached tracks
+  const artistAlbumArt = new Map<string, string>()
+  for (const tracks of trackCache.values()) {
+    for (const track of tracks) {
+      for (const artist of track.artists) {
+        if (!artistAlbumArt.has(artist.id)) {
+          const url = track.album.images.find((img) => !!img.url)?.url ?? ''
+          if (url) artistAlbumArt.set(artist.id, url)
+        }
+      }
+    }
+  }
+
   hideStatus()
-  renderPage(user)
+  renderPage(user, artistAlbumArt)
 }
 
-function renderPage(user: SpotifyUser): void {
+function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): void {
   injectGlobalStyles()
 
   const app = document.getElementById('app')!
@@ -145,7 +158,7 @@ function renderPage(user: SpotifyUser): void {
     const artists = artistCache.get(range) ?? []
     const tracks = trackCache.get(range) ?? []
 
-    artistSvg = renderArtistMosaic(artistSection.container, artists, tooltip)
+    artistSvg = renderArtistMosaic(artistSection.container, artists, tooltip, artistAlbumArt)
     trackSvg = renderTrackMosaic(trackSection.container, tracks, tooltip)
 
     controls.querySelectorAll<HTMLButtonElement>('button[data-range]').forEach((btn) => {
@@ -238,11 +251,10 @@ function injectGlobalStyles(): void {
   style.textContent = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #0e0e14;
-      background-image:
-        radial-gradient(ellipse at 15% 40%, rgba(26,8,64,0.85) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 20%, rgba(0,40,80,0.6) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 90%, rgba(40,10,50,0.5) 0%, transparent 45%);
+      background-color: #1c1c1c;
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='512' height='512' filter='url(%23n)'/></svg>");
+      background-blend-mode: soft-light;
+      background-size: 512px 512px;
       overflow-x: hidden;
     }
   `
