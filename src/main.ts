@@ -7,7 +7,6 @@ import {
   isAuthCallback,
 } from './auth/spotify-auth'
 import { fetchCurrentUser, fetchTopArtists, fetchTopTracks } from './api/spotify-client'
-import { exportGraphAsPng } from './graph/export'
 import { mountTooltip, renderArtistMosaic, renderTrackMosaic } from './ui/track-mosaic'
 import type { SpotifyArtist, SpotifyTrack, SpotifyUser, TimeRange } from './types/spotify'
 
@@ -17,18 +16,10 @@ const TIME_RANGE_LABELS: Record<TimeRange, string> = {
   medium_term: '6 Months',
   long_term: 'All Time',
 }
-const TIME_RANGE_SLUGS: Record<TimeRange, string> = {
-  short_term: '4-weeks',
-  medium_term: '6-months',
-  long_term: 'all-time',
-}
-
 const artistCache = new Map<TimeRange, SpotifyArtist[]>()
 const trackCache = new Map<TimeRange, SpotifyTrack[]>()
 
 let activeRange: TimeRange = 'medium_term'
-let artistSvg: SVGSVGElement | null = null
-let trackSvg: SVGSVGElement | null = null
 
 async function main(): Promise<void> {
   const config = loadConfig()
@@ -87,7 +78,7 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 32px;
-    background: rgba(14,14,20,0.88);
+    background: rgba(17,18,19,0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255,255,255,0.07);
   `
@@ -138,28 +129,18 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
 
   const tooltip = mountTooltip(document.body).el
 
-  const artistSection = buildSection('Your Top Artists', () => {
-    if (artistSvg) {
-      const today = new Date().toISOString().slice(0, 10)
-      exportGraphAsPng(artistSvg, `top-artists-${TIME_RANGE_SLUGS[activeRange]}-${today}.png`)
-    }
-  })
+  const artistSection = buildSection('Your Top Artists')
   content.appendChild(artistSection.wrapper)
 
-  const trackSection = buildSection('Your Top Tracks', () => {
-    if (trackSvg) {
-      const today = new Date().toISOString().slice(0, 10)
-      exportGraphAsPng(trackSvg, `top-tracks-${TIME_RANGE_SLUGS[activeRange]}-${today}.png`)
-    }
-  })
+  const trackSection = buildSection('Your Top Tracks')
   content.appendChild(trackSection.wrapper)
 
   function draw(range: TimeRange): void {
     const artists = artistCache.get(range) ?? []
     const tracks = trackCache.get(range) ?? []
 
-    artistSvg = renderArtistMosaic(artistSection.container, artists, tooltip, artistAlbumArt)
-    trackSvg = renderTrackMosaic(trackSection.container, tracks, tooltip)
+    renderArtistMosaic(artistSection.container, artists, tooltip, artistAlbumArt)
+    renderTrackMosaic(trackSection.container, tracks, tooltip)
 
     controls.querySelectorAll<HTMLButtonElement>('button[data-range]').forEach((btn) => {
       applyButtonStyle(btn, btn.dataset['range'] === range)
@@ -194,37 +175,17 @@ function buildRangeControls(): HTMLDivElement {
   return wrapper
 }
 
-function buildSection(
-  heading: string,
-  onExport: () => void
-): { wrapper: HTMLElement; container: HTMLDivElement } {
+function buildSection(heading: string): { wrapper: HTMLElement; container: HTMLDivElement } {
   const wrapper = document.createElement('section')
   wrapper.style.cssText = `margin-bottom:56px;`
-
-  const sectionHeader = document.createElement('div')
-  sectionHeader.style.cssText = `
-    display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;
-  `
 
   const h2 = document.createElement('h2')
   h2.style.cssText = `
     font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
-    color:rgba(255,255,255,0.4);font-family:system-ui,sans-serif;
+    color:rgba(255,255,255,0.4);font-family:system-ui,sans-serif;margin-bottom:20px;
   `
   h2.textContent = heading
-
-  const exportBtn = document.createElement('button')
-  exportBtn.textContent = '↓ Export PNG'
-  exportBtn.style.cssText = `
-    background:transparent;border:1px solid rgba(255,255,255,0.15);
-    color:rgba(255,255,255,0.5);border-radius:8px;
-    padding:5px 12px;font-size:11px;cursor:pointer;font-family:system-ui,sans-serif;
-  `
-  exportBtn.addEventListener('click', onExport)
-
-  sectionHeader.appendChild(h2)
-  sectionHeader.appendChild(exportBtn)
-  wrapper.appendChild(sectionHeader)
+  wrapper.appendChild(h2)
 
   const container = document.createElement('div')
   container.style.cssText = `width:100%;`
@@ -235,9 +196,9 @@ function buildSection(
 
 function applyButtonStyle(btn: HTMLButtonElement, active: boolean): void {
   btn.style.cssText = `
-    background:${active ? 'rgba(255,255,255,0.12)' : 'transparent'};
-    border:1px solid ${active ? 'rgba(255,255,255,0.25)' : 'transparent'};
-    color:${active ? '#fff' : 'rgba(255,255,255,0.45)'};
+    background:${active ? 'rgba(29,185,84,0.15)' : 'transparent'};
+    border:1px solid ${active ? 'rgba(29,185,84,0.5)' : 'transparent'};
+    color:${active ? '#1DB954' : 'rgba(255,255,255,0.45)'};
     border-radius:7px;padding:5px 12px;font-size:12px;
     font-weight:${active ? '600' : '400'};
     cursor:pointer;white-space:nowrap;font-family:system-ui,sans-serif;
@@ -250,13 +211,7 @@ function injectGlobalStyles(): void {
   style.id = 'app-styles'
   style.textContent = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: #1c1c1c;
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='512' height='512' filter='url(%23n)'/></svg>");
-      background-blend-mode: soft-light;
-      background-size: 512px 512px;
-      overflow-x: hidden;
-    }
+    body { background: #111213; overflow-x: hidden; }
   `
   document.head.appendChild(style)
 }

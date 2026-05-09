@@ -5,6 +5,7 @@ interface PackItem {
   id: string
   rank: number
   imageUrl: string
+  fallbackImageUrl?: string
   label: string
   sublabel: string
   spotifyUrl: string
@@ -128,6 +129,11 @@ function renderCirclePack(
     .attr('height', (d) => d.r * 2)
     .attr('clip-path', (d) => `url(#${clipPrefix}-${d.data.id})`)
     .attr('preserveAspectRatio', 'xMidYMid slice')
+    .on('error', function (_, d) {
+      const fallback = d.data.fallbackImageUrl
+      if (fallback) d3.select(this).attr('href', fallback)
+      else d3.select(this).remove()
+    })
 
   // Fallback initials
   groups
@@ -207,10 +213,12 @@ export function renderArtistMosaic(
   const items: PackItem[] = artists.map((a, i) => {
     const imgs = a.images
     const artistImageUrl = imgs.find((img) => !!img.url)?.url ?? ''
+    const albumArt = artistAlbumArt?.get(a.id)
     return {
       id: a.id,
       rank: i + 1,
-      imageUrl: artistImageUrl || artistAlbumArt?.get(a.id) || '',
+      imageUrl: (a.id === '1cXi8ALPQCBHZbf0EgP4Ey' ? albumArt : artistImageUrl) || albumArt || artistImageUrl || '',
+      fallbackImageUrl: albumArt || undefined,
       label: a.name,
       sublabel: '',
       spotifyUrl: a.external_urls.spotify,
