@@ -9,9 +9,6 @@ dist/
 .env.local
 .env.*.local
 
-# Output folder contents (keep the folder, ignore contents)
-output/*
-!output/.gitkeep
 
 # Editor
 .vscode/
