@@ -2,6 +2,8 @@
 
 Visualise your Spotify listening history as interactive bubble mosaics. Connect your Spotify account to see your top artists and tracks arranged by how much you play them — the bigger the bubble, the more you listen.
 
+View your WaveLength here; https://GrahlmanMatthew.github.io/Spotify-Wavelength/
+
 ## Features
 
 - **Top artists & tracks** across three time ranges: Last 4 Weeks, Last 6 Months, All Time
@@ -45,14 +47,6 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:5173` and connect your Spotify account.
-
-## Deployment (GitHub Pages)
-
-1. Add `https://GrahlmanMatthew.github.io/Spotify-Wavelength/` to your Spotify app's Redirect URIs
-2. In your GitHub repo go to **Settings → Secrets and variables → Actions** and add:
-   - `VITE_SPOTIFY_CLIENT_ID` — your Spotify Client ID
-   - `VITE_REDIRECT_URI` — `https://GrahlmanMatthew.github.io/Spotify-Wavelength/`
-3. Push to `main` — the GitHub Actions workflow builds and deploys automatically
 
 ## Tech
 
