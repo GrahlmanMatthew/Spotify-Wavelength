@@ -4,6 +4,8 @@ Visualise your Spotify listening history as interactive bubble mosaics. Connect 
 
 View your WaveLength here; https://GrahlmanMatthew.github.io/Spotify-Wavelength/
 
+![Generated Sample](./output/sample.png)
+
 ## Features
 
 - **Top artists & tracks** across three time ranges: Last 4 Weeks, Last 6 Months, All Time
