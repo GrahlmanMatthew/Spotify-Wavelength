@@ -34,8 +34,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_SPOTIFY_CLIENT_ID: ${{ vars.VITE_SPOTIFY_CLIENT_ID }}
-          VITE_REDIRECT_URI: ${{ vars.VITE_REDIRECT_URI }}
+          VITE_SPOTIFY_CLIENT_ID: ${{ secrets.VITE_SPOTIFY_CLIENT_ID }}
+          VITE_REDIRECT_URI: ${{ secrets.VITE_REDIRECT_URI }}
 
       - uses: actions/configure-pages@v5
 
