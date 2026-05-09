@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wavelength</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        background: #111213;
+      }
+
+      #app {
+        width: 100%;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      @keyframes pulse-ring {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.6; transform: scale(1.15); }
+      }
+
+      .graph-node-ring.pulsing {
+        animation: pulse-ring 1.2s ease-in-out infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
