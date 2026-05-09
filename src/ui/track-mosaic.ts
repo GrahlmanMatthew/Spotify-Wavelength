@@ -44,7 +44,11 @@ function renderCirclePack(
 ): SVGSVGElement {
   container.innerHTML = ''
 
-  const size = Math.min((container.clientWidth || 800) * 1.2, Math.floor(window.innerHeight * 0.82 * 1.2))
+  const size = Math.min(
+    (container.clientWidth || 800) * 1.2,
+    Math.floor(window.innerHeight * 0.82 * 1.2),
+    window.innerWidth
+  )
 
   const root = d3
     .hierarchy<{ children?: PackItem[] } | PackItem>({ children: items })
@@ -63,6 +67,7 @@ function renderCirclePack(
     .style('background', 'transparent')
     .style('display', 'block')
     .style('margin', '0 auto')
+    .style('touch-action', 'pan-y')
 
   const defs = svg.append('defs')
   const leaves = root.leaves() as d3.HierarchyCircularNode<PackItem>[]
@@ -75,6 +80,30 @@ function renderCirclePack(
       .attr('r', leaf.r)
   })
 
+  const showTooltip = (d: d3.HierarchyCircularNode<PackItem>, x: number, y: number) => {
+    const rankLabel =
+      d.data.itemType === 'artist'
+        ? d.data.rank === 1
+          ? 'Your most played artist'
+          : d.data.rank <= 10
+            ? `Your #${d.data.rank} most played artist`
+            : `#${d.data.rank} in your top artists`
+        : null
+    const durationLabel =
+      d.data.duration != null
+        ? `${Math.floor(d.data.duration / 60000)}:${String(Math.floor((d.data.duration % 60000) / 1000)).padStart(2, '0')}`
+        : null
+    tooltip.innerHTML = `
+      <div style="font-size:12px;font-weight:700;color:#fff;line-height:1.3">${d.data.label}</div>
+      ${d.data.sublabel ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px">${d.data.sublabel}</div>` : ''}
+      ${d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px">${d.data.album}${durationLabel ? ` · ${durationLabel}` : ''}</div>` : ''}
+      ${rankLabel ? `<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${rankLabel}</div>` : !d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">#${d.data.rank}</div>` : ''}
+    `
+    tooltip.style.opacity = '1'
+    tooltip.style.left = `${Math.min(x + 14, window.innerWidth - 240)}px`
+    tooltip.style.top = `${Math.max(y - 10, 8)}px`
+  }
+
   const groups = svg
     .selectAll<SVGGElement, d3.HierarchyCircularNode<PackItem>>('g.pack-item')
     .data(leaves)
@@ -84,33 +113,14 @@ function renderCirclePack(
     .attr('transform', (d) => `translate(${d.x},${d.y})`)
     .style('cursor', 'default')
     .on('mousemove', (event: MouseEvent, d) => {
-      const rankLabel =
-        d.data.itemType === 'artist'
-          ? d.data.rank === 1
-            ? 'Your most played artist'
-            : d.data.rank <= 10
-              ? `Your #${d.data.rank} most played artist`
-              : `#${d.data.rank} in your top artists`
-          : null
-
-      const durationLabel =
-        d.data.duration != null
-          ? `${Math.floor(d.data.duration / 60000)}:${String(Math.floor((d.data.duration % 60000) / 1000)).padStart(2, '0')}`
-          : null
-
-      tooltip.innerHTML = `
-        <div style="font-size:12px;font-weight:700;color:#fff;line-height:1.3">${d.data.label}</div>
-        ${d.data.sublabel ? `<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px">${d.data.sublabel}</div>` : ''}
-        ${d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px">${d.data.album}${durationLabel ? ` · ${durationLabel}` : ''}</div>` : ''}
-        ${rankLabel ? `<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px">${rankLabel}</div>` : !d.data.album ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px">#${d.data.rank}</div>` : ''}
-      `
-      tooltip.style.opacity = '1'
-      tooltip.style.left = `${event.clientX + 14}px`
-      tooltip.style.top = `${event.clientY - 10}px`
+      showTooltip(d, event.clientX, event.clientY)
     })
-    .on('mouseleave', () => {
-      tooltip.style.opacity = '0'
-    })
+    .on('mouseleave', () => { tooltip.style.opacity = '0' })
+    .on('touchstart', (event: TouchEvent, d) => {
+      const touch = event.touches[0]
+      if (touch) showTooltip(d, touch.clientX, touch.clientY - 60)
+    }, { passive: true })
+    .on('touchend', () => { tooltip.style.opacity = '0' })
 
   // Background circle
   groups

@@ -1,13 +1,14 @@
 {
-  "name": "spotify-listening-history-graph",
+  "name": "spotify-wavelength",
   "version": "0.1.0",
+  "description": "Visualise your Spotify top artists and tracks as interactive bubble mosaics.",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write src"

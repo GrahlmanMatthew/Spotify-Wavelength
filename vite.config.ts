@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ command }) => ({
-  base: command === 'serve' ? '/' : '/spotify-listening-history-graph/',
+  base: command === 'serve' ? '/' : '/Spotify-Wavelength/',
   build: {
     outDir: 'dist',
     sourcemap: true,

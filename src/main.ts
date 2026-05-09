@@ -74,6 +74,7 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
 
   // Header
   const header = document.createElement('header')
+  header.id = 'app-header'
   header.style.cssText = `
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
@@ -84,6 +85,7 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
   `
 
   const title = document.createElement('div')
+  title.id = 'header-title'
   title.style.cssText = `display:flex;align-items:center;gap:8px;`
   title.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 18" width="48" height="18" aria-hidden="true">
@@ -96,10 +98,10 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
   `
   header.appendChild(title)
 
-  // User profile — centered absolutely so range controls stay right-aligned
+  // User profile — centered absolutely on desktop (via CSS), inline on mobile
   const userChip = document.createElement('div')
+  userChip.id = 'user-chip'
   userChip.style.cssText = `
-    position:absolute; left:50%; transform:translateX(-50%);
     display:flex; align-items:center; gap:8px;
     font-size:13px; font-weight:500; color:rgba(255,255,255,0.75);
     font-family:system-ui,sans-serif;
@@ -114,16 +116,19 @@ function renderPage(user: SpotifyUser, artistAlbumArt: Map<string, string>): voi
     userChip.appendChild(img)
   }
   const nameEl = document.createElement('span')
+  nameEl.className = 'user-name'
   nameEl.textContent = user.display_name
   userChip.appendChild(nameEl)
   header.appendChild(userChip)
 
   const controls = buildRangeControls()
+  controls.id = 'header-controls'
   header.appendChild(controls)
   app.appendChild(header)
 
   // Page content
   const content = document.createElement('main')
+  content.id = 'app-content'
   content.style.cssText = `max-width:960px;margin:0 auto;padding:40px 32px 80px;`
   app.appendChild(content)
 
@@ -211,7 +216,28 @@ function injectGlobalStyles(): void {
   style.id = 'app-styles'
   style.textContent = `
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #111213; overflow-x: hidden; }
+    body { background: #111213; }
+
+    /* Desktop: user chip floats centered over the header */
+    @media (min-width: 601px) {
+      #user-chip { position: absolute; left: 50%; transform: translateX(-50%); }
+    }
+
+    /* Mobile: two-row header, tighter padding */
+    @media (max-width: 600px) {
+      #app-header {
+        display: grid !important;
+        grid-template-areas: "title user" "controls controls";
+        grid-template-columns: 1fr auto;
+        padding: 10px 16px !important;
+        gap: 10px 8px;
+      }
+      #header-title   { grid-area: title; }
+      #user-chip      { grid-area: user; }
+      #header-controls { grid-area: controls; justify-self: center; }
+      .user-name      { display: none; }
+      #app-content    { padding: 24px 16px 60px !important; }
+    }
   `
   document.head.appendChild(style)
 }

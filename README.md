@@ -1,69 +1,61 @@
-# Spotify Listening Graph
+# Wavelength
 
-[![CI](https://github.com/grahlmanmatthew/spotify-listening-history-graph/actions/workflows/ci.yml/badge.svg)](https://github.com/grahlmanmatthew/spotify-listening-history-graph/actions/workflows/ci.yml)
-![GitHub release](https://img.shields.io/github/v/release/grahlmanmatthew/spotify-listening-history-graph)
+Visualise your Spotify listening history as interactive bubble mosaics. Connect your Spotify account to see your top artists and tracks arranged by how much you play them — the bigger the bubble, the more you listen.
 
-> A force-directed graph of your Spotify listening history — artists as nodes, edges weighted by related-artist overlap, clusters colour-coded by genre.
+## Features
 
-<!-- Add demo GIF here before opening the final PR -->
+- **Top artists & tracks** across three time ranges: Last 4 Weeks, Last 6 Months, All Time
+- **Circle-pack mosaic** — bubble size reflects your listening rank
+- **Rank badges** on your top 10 artists and tracks
+- **Hover / tap tooltips** with track duration, album name, and artist rank context
+- **Mobile-friendly** — responsive layout, touch tooltips, no horizontal scroll
+- Fully client-side — no backend, no data stored anywhere
 
-## How it works
+## Setup
 
-Your top 50 artists across three time windows (4 weeks, 6 months, all time) become nodes in a physics simulation. An edge is drawn between two artists only when Spotify's `related-artists` endpoint lists each as a relation of the other — mutual similarity, not one-directional. Edge thickness scales with how many related artists the pair shares.
+### Prerequisites
 
-Each node is your artist's Spotify profile photo, ringed in a neon halo coloured by their primary genre bucket (rock, pop, hip-hop, electronic, jazz, classical, metal, folk, R&B). The simulation runs a D3 force layout — nodes repel each other, edges act as springs pulling similar artists together — until it cools and settles. The result is a personal map of your taste: genre clusters emerge, crossover artists sit at the borders, your most-listened act dominates the centre by node size.
+- Node.js 18+ and npm
+- A [Spotify Developer](https://developer.spotify.com/dashboard) account
 
-## Prerequisites
+### 1. Create a Spotify app
 
-- Node 22+ (`node --version`)
-- A [Spotify Developer app](https://developer.spotify.com/dashboard) with your redirect URIs added
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create a new app
+2. Under **Redirect URIs**, add `http://127.0.0.1:5173/` (for local dev)
+3. Copy your **Client ID**
 
-## Installation and setup
-
-```bash
-git clone https://github.com/grahlmanmatthew/spotify-listening-history-graph.git
-cd spotify-listening-history-graph
-npm install
-```
-
-Copy the env template and fill in your Spotify Client ID:
+### 2. Configure environment
 
 ```bash
 cp .env.example .env.local
-# then edit .env.local and set VITE_SPOTIFY_CLIENT_ID=<your client id>
 ```
 
-## Usage
+Edit `.env.local`:
+
+```
+VITE_SPOTIFY_CLIENT_ID=your_client_id_here
+VITE_REDIRECT_URI=http://127.0.0.1:5173/
+```
+
+### 3. Run locally
 
 ```bash
+npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`, click **Connect Spotify**, and log in. The graph will render once your top artist and related-artist data has been fetched (expect 10–20 seconds on first load).
+Open `http://127.0.0.1:5173` and connect your Spotify account.
 
-**Controls:**
-- Hover a node — tooltip with artist name, genres, and rank
-- Click a node — opens the artist's Spotify page
-- Drag nodes — repositions them; simulation re-settles around the new position
-- Bottom bar — toggle between **4 Weeks**, **6 Months**, **All Time** views
-- **↓ Export PNG** — downloads the current graph as a high-resolution PNG
+## Deployment (GitHub Pages)
 
-## Configuration
+1. Add `https://GrahlmanMatthew.github.io/Spotify-Wavelength/` to your Spotify app's Redirect URIs
+2. In your GitHub repo go to **Settings → Secrets and variables → Actions** and add:
+   - `VITE_SPOTIFY_CLIENT_ID` — your Spotify Client ID
+   - `VITE_REDIRECT_URI` — `https://GrahlmanMatthew.github.io/Spotify-Wavelength/`
+3. Push to `main` — the GitHub Actions workflow builds and deploys automatically
 
-| Variable | Required | Description |
-|---|---|---|
-| `VITE_SPOTIFY_CLIENT_ID` | Yes | Your Spotify app's Client ID (non-secret) |
+## Tech
 
-Add `http://localhost:5173/` as a redirect URI in your Spotify Developer app settings for local dev.
-
-For GitHub Pages, add `https://grahlmanmatthew.github.io/spotify-listening-history-graph/` as a redirect URI and set `VITE_SPOTIFY_CLIENT_ID` as a repository variable under **Settings → Secrets and variables → Variables**.
-
-## Running the tests
-
-```bash
-npm test
-```
-
----
-
-© 2026 Matthew Grahlman. All rights reserved.
+- [Vite](https://vitejs.dev/) + TypeScript
+- [D3.js](https://d3js.org/) — circle-pack layout and SVG rendering
+- Spotify Web API — PKCE OAuth (no backend required)

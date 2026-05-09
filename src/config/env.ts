@@ -1,13 +1,11 @@
 export interface AppConfig {
   spotifyClientId: string
   redirectUri: string
-  lastfmApiKey: string
 }
 
 export function loadConfig(): AppConfig {
   const spotifyClientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined
   const redirectUri = import.meta.env.VITE_REDIRECT_URI as string | undefined
-  const lastfmApiKey = (import.meta.env.VITE_LASTFM_API_KEY as string | undefined) ?? ''
 
   if (!spotifyClientId) {
     throw new Error(
@@ -21,5 +19,5 @@ export function loadConfig(): AppConfig {
     )
   }
 
-  return { spotifyClientId, redirectUri, lastfmApiKey }
+  return { spotifyClientId, redirectUri }
 }
