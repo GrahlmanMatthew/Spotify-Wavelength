@@ -25,8 +25,14 @@ async function main(): Promise<void> {
   const config = loadConfig()
 
   if (isAuthCallback()) {
-    showStatus('Completing login…')
-    await handleAuthCallback(config.spotifyClientId, config.redirectUri)
+    const verifier = sessionStorage.getItem('spotify_pkce_verifier')
+    if (verifier) {
+      showStatus('Completing login…')
+      await handleAuthCallback(config.spotifyClientId, config.redirectUri)
+    } else {
+      // No verifier — orphaned or shared callback URL. Strip params and show landing.
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }
 
   const token = getStoredToken()
