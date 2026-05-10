@@ -2,8 +2,6 @@
 
 Visualise your Spotify listening history as interactive bubble mosaics. Connect your Spotify account to see your top artists and tracks arranged by how much you play them — the bigger the bubble, the more you listen.
 
-View your WaveLength here; https://GrahlmanMatthew.github.io/Spotify-Wavelength/
-
 ![Top Artists](./output/artists.png)
 ![Top Tracks](./output/tracks.png)
 
