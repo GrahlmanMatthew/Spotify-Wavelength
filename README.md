@@ -4,7 +4,8 @@ Visualise your Spotify listening history as interactive bubble mosaics. Connect 
 
 View your WaveLength here; https://GrahlmanMatthew.github.io/Spotify-Wavelength/
 
-![Generated Sample](./output/sample.png)
+![Top Artists](./output/artists.png)
+![Top Tracks](./output/tracks.png)
 
 ## Features
 
@@ -14,6 +15,8 @@ View your WaveLength here; https://GrahlmanMatthew.github.io/Spotify-Wavelength/
 - **Hover / tap tooltips** with track duration, album name, and artist rank context
 - **Mobile-friendly** — responsive layout, touch tooltips, no horizontal scroll
 - Fully client-side — no backend, no data stored anywhere
+
+> **Note:** The hosted app is in Spotify's Development Mode, which limits access to whitelisted users only. To request access, open an issue or contact the repo owner. Alternatively, clone the repo and run it locally with your own Spotify app credentials.
 
 ## Setup
 
