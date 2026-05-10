@@ -295,16 +295,22 @@ function hideStatus(): void {
 
 main().catch((err: unknown) => {
   console.error(err)
+  const message = err instanceof Error ? err.message : String(err)
+  const isAuthError = message.includes('401') || message.includes('403') || message.includes('verifier')
+
+  // Only wipe the token if auth itself is broken — not for transient API failures
+  if (isAuthError) clearAuth()
+
   const app = document.getElementById('app')!
   app.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;
-      color:#ff6b6b;font-family:system-ui,sans-serif;padding:24px;text-align:center;">
-      Something went wrong.
-      <button onclick="location.reload()" style="margin-left:8px;background:none;
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+      height:100vh;color:#ff6b6b;font-family:system-ui,sans-serif;padding:24px;text-align:center;gap:12px;">
+      <div>Something went wrong.</div>
+      <div style="font-size:11px;color:rgba(255,100,100,0.6);max-width:400px;word-break:break-word">${message}</div>
+      <button onclick="location.reload()" style="background:none;
         border:1px solid #ff6b6b;color:#ff6b6b;padding:4px 10px;border-radius:6px;cursor:pointer">
         Retry
       </button>
     </div>
   `
-  clearAuth()
 })
